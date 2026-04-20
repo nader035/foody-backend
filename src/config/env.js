@@ -13,6 +13,17 @@ function normalizeMongoUri(uri) {
   return uri.replace("mongodb://localhost", "mongodb://127.0.0.1");
 }
 
+function parseCorsOrigins(value) {
+  if (!value) {
+    return ["http://localhost:3000"];
+  }
+
+  return value
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
 if (isProduction) {
   const requiredVars = ["MONGO_URI", "JWT_SECRET"];
 
@@ -33,7 +44,9 @@ if (!process.env.MONGO_URI && !isProduction) {
 }
 
 if (!process.env.JWT_SECRET && !isProduction) {
-  console.warn("[env] JWT_SECRET is not set. Using development fallback secret.");
+  console.warn(
+    "[env] JWT_SECRET is not set. Using development fallback secret.",
+  );
 }
 
 export const env = {
@@ -42,5 +55,5 @@ export const env = {
   mongoUri: normalizeMongoUri(process.env.MONGO_URI || defaultMongoUri),
   jwtSecret: process.env.JWT_SECRET || defaultJwtSecret,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  corsOrigin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  corsOrigins: parseCorsOrigins(process.env.CORS_ORIGIN),
 };
