@@ -68,12 +68,17 @@ export async function createSurplusMeal(actor, payload) {
   }
 
   const quantityAvailable = payload.quantityAvailable ?? payload.quantityTotal;
+  const expiresAtDate = new Date(payload.expiresAt);
+
+  if (expiresAtDate <= new Date()) {
+    throw new ApiError(400, "Expiration time must be in the future");
+  }
 
   const meal = await SurplusMeal.create({
     ...payload,
     quantityAvailable,
     createdBy: actor._id,
-    expiresAt: new Date(payload.expiresAt),
+    expiresAt: expiresAtDate,
   });
 
   await recordAuditEvent({
@@ -219,7 +224,11 @@ export async function updateSurplusMeal(actor, mealId, payload) {
   Object.assign(meal, payload);
 
   if (payload.expiresAt) {
-    meal.expiresAt = new Date(payload.expiresAt);
+    const expiresAtDate = new Date(payload.expiresAt);
+    if (expiresAtDate <= new Date()) {
+      throw new ApiError(400, "Expiration time must be in the future");
+    }
+    meal.expiresAt = expiresAtDate;
   }
 
   await meal.save();
