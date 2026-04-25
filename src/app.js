@@ -22,17 +22,18 @@ app.use(
         return callback(null, true);
       }
 
-      if (env.corsOrigins.includes(origin)) {
+      if (env.corsOrigins.includes("*") || env.corsOrigins.includes(origin)) {
         return callback(null, true);
       }
 
+      console.warn(`[CORS] Blocked request from origin: ${origin}`);
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   }),
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(morgan("dev"));
 
 app.get("/health", (req, res) => {

@@ -185,7 +185,7 @@ export async function requestPasswordReset(email) {
 
   return {
     accepted: true,
-    resetToken: env.nodeEnv === "development" ? rawToken : null,
+    resetToken: rawToken, // TODO: Replace with actual email service in production
   };
 }
 
