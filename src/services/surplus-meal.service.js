@@ -142,6 +142,7 @@ export async function listSurplusMeals(actor, filters = {}, options = {}) {
   if (!actor || !["manager", "staff"].includes(actor.role)) {
     query.status = "available";
     query["visibility.allowMarketplace"] = true;
+    query.quantityAvailable = { $gt: 0 };
     query.expiresAt = { $gt: new Date() };
   }
 
