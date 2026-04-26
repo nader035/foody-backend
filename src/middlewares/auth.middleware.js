@@ -52,14 +52,10 @@ export async function optionalAuth(req, res, next) {
 
     req.user = await resolveAuthenticatedUser(token);
     return next();
-  } catch (error) {
-    if (
-      error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
-    ) {
-      return next(new ApiError(401, "Invalid or expired token"));
-    }
-    return next(error);
+  } catch {
+    // For optional auth, silently proceed as unauthenticated guest.
+    // Invalid or expired tokens should not block public endpoints.
+    return next();
   }
 }
 

@@ -5,53 +5,18 @@ import { Donation } from "../models/donation.model.js";
 import { SurplusMeal } from "../models/surplus-meal.model.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/apiResponse.js";
+import { ensureObjectId } from "../utils/validation.helpers.js";
+import {
+  ensureManagerOwnsBranch,
+  ensureStaffCanAccessBranch,
+} from "../utils/branch-access.helpers.js";
 import { toPaginatedResult } from "../utils/list-query.js";
 import { recordAuditEvent } from "./audit-log.service.js";
-
-function ensureObjectId(value, fieldName) {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
-    throw new ApiError(400, `Invalid ${fieldName}`);
-  }
-}
 
 function generatePickupCode() {
   return `PK-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 }
 
-async function ensureManagerOwnsBranch(managerId, branchId) {
-  const branch = await Branch.findOne({
-    _id: branchId,
-    managerId,
-    isActive: true,
-  });
-  if (!branch) {
-    throw new ApiError(404, "Branch not found or inactive");
-  }
-}
-
-async function ensureStaffCanAccessBranch(staffActor, branchId) {
-  if (staffActor.branchId && String(staffActor.branchId) !== String(branchId)) {
-    throw new ApiError(403, "Staff can only access their assigned branch");
-  }
-
-  const query = {
-    _id: branchId,
-    isActive: true,
-  };
-
-  if (staffActor.managerId) {
-    query.managerId = staffActor.managerId;
-  }
-
-  if (!staffActor.branchId && staffActor.branchName) {
-    query.name = staffActor.branchName;
-  }
-
-  const branch = await Branch.findOne(query);
-  if (!branch) {
-    throw new ApiError(403, "Staff is not assigned to this branch");
-  }
-}
 
 export async function createDonationMatch(actor, payload) {
   if (!["manager", "staff"].includes(actor.role)) {

@@ -1,4 +1,5 @@
 import { ApiError, ApiResponse } from "../utils/apiResponse.js";
+import { zodErrorsToMap } from "../utils/validation.helpers.js";
 import {
   createBranchForManager,
   getBranchByIdForManager,
@@ -11,12 +12,7 @@ import {
 } from "../validators/branch.validator.js";
 import { parsePaginationQuery } from "../utils/list-query.js";
 
-function zodErrorsToMap(issues) {
-  return issues.map((issue) => ({
-    path: issue.path.join("."),
-    message: issue.message,
-  }));
-}
+
 
 export async function createBranch(req, res, next) {
   try {

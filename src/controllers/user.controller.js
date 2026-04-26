@@ -1,4 +1,5 @@
 import { ApiResponse, ApiError } from "../utils/apiResponse.js";
+import { zodErrorsToMap } from "../utils/validation.helpers.js";
 import {
   changeUserPassword,
   getUserProfile,
@@ -22,12 +23,7 @@ import {
   updateStaffStatusSchema,
 } from "../validators/user.validator.js";
 
-function zodErrorsToMap(issues) {
-  return issues.map((issue) => ({
-    path: issue.path.join("."),
-    message: issue.message,
-  }));
-}
+
 
 export async function register(req, res, next) {
   try {

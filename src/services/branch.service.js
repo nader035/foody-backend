@@ -1,13 +1,10 @@
 import mongoose from "mongoose";
 import { Branch } from "../models/branch.model.js";
 import { ApiError } from "../utils/apiResponse.js";
+import { ensureObjectId } from "../utils/validation.helpers.js";
 import { toPaginatedResult } from "../utils/list-query.js";
 
-function ensureObjectId(value, fieldName) {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
-    throw new ApiError(400, `Invalid ${fieldName}`);
-  }
-}
+
 
 export async function createBranchForManager(managerId, payload) {
   const branch = await Branch.create({

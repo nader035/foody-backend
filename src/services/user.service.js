@@ -5,6 +5,7 @@ import { User } from "../models/user.model.js";
 import { Branch } from "../models/branch.model.js";
 import { PasswordResetToken } from "../models/password-reset-token.model.js";
 import { ApiError } from "../utils/apiResponse.js";
+import { ensureObjectId } from "../utils/validation.helpers.js";
 import { env } from "../config/env.js";
 
 function buildToken(userId) {
@@ -23,11 +24,7 @@ function hashToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
-function ensureObjectId(value, fieldName) {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
-    throw new ApiError(400, `Invalid ${fieldName}`);
-  }
-}
+
 
 async function ensureManagerCanAssignBranch(managerId, branchId) {
   ensureObjectId(branchId, "branchId");

@@ -1,4 +1,5 @@
 import { ApiError, ApiResponse } from "../utils/apiResponse.js";
+import { zodErrorsToMap } from "../utils/validation.helpers.js";
 import {
   createDonationMatch,
   listDonations,
@@ -10,12 +11,7 @@ import {
 } from "../validators/donation.validator.js";
 import { parsePaginationQuery } from "../utils/list-query.js";
 
-function zodErrorsToMap(issues) {
-  return issues.map((issue) => ({
-    path: issue.path.join("."),
-    message: issue.message,
-  }));
-}
+
 
 export async function createDonation(req, res, next) {
   try {

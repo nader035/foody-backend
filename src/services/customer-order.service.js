@@ -3,14 +3,11 @@ import { Branch } from "../models/branch.model.js";
 import { CustomerOrder } from "../models/customer-order.model.js";
 import { SurplusMeal } from "../models/surplus-meal.model.js";
 import { ApiError } from "../utils/apiResponse.js";
+import { ensureObjectId } from "../utils/validation.helpers.js";
 import { toPaginatedResult } from "../utils/list-query.js";
 import { recordAuditEvent } from "./audit-log.service.js";
 
-function ensureObjectId(value, fieldName) {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
-    throw new ApiError(400, `Invalid ${fieldName}`);
-  }
-}
+
 
 export async function createCustomerOrder(actor, payload) {
   if (actor.role !== "customer") {

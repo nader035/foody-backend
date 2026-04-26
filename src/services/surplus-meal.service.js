@@ -2,57 +2,15 @@ import mongoose from "mongoose";
 import { Branch } from "../models/branch.model.js";
 import { SurplusMeal } from "../models/surplus-meal.model.js";
 import { ApiError } from "../utils/apiResponse.js";
+import { ensureObjectId } from "../utils/validation.helpers.js";
+import {
+  ensureManagerOwnsBranch,
+  ensureStaffCanAccessBranch,
+} from "../utils/branch-access.helpers.js";
 import { toPaginatedResult } from "../utils/list-query.js";
 import { recordAuditEvent } from "./audit-log.service.js";
 
-function ensureObjectId(value, fieldName) {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
-    throw new ApiError(400, `Invalid ${fieldName}`);
-  }
-}
 
-async function ensureManagerOwnsBranch(managerId, branchId) {
-  const branch = await Branch.findOne({
-    _id: branchId,
-    managerId,
-    isActive: true,
-  });
-  if (!branch) {
-    throw new ApiError(404, "Branch not found or inactive");
-  }
-  return branch;
-}
-
-async function ensureStaffCanAccessBranch(staffActor, branchId) {
-  const requestedBranchId = String(branchId);
-
-  if (
-    staffActor.branchId &&
-    String(staffActor.branchId) !== requestedBranchId
-  ) {
-    throw new ApiError(403, "Staff can only access their assigned branch");
-  }
-
-  const query = {
-    _id: branchId,
-    isActive: true,
-  };
-
-  if (staffActor.managerId) {
-    query.managerId = staffActor.managerId;
-  }
-
-  if (!staffActor.branchId && staffActor.branchName) {
-    query.name = staffActor.branchName;
-  }
-
-  const branch = await Branch.findOne(query);
-  if (!branch) {
-    throw new ApiError(403, "Staff is not assigned to this branch");
-  }
-
-  return branch;
-}
 
 export async function createSurplusMeal(actor, payload) {
   if (!["manager", "staff"].includes(actor.role)) {

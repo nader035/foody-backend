@@ -1,4 +1,5 @@
 import { ApiError, ApiResponse } from "../utils/apiResponse.js";
+import { zodErrorsToMap } from "../utils/validation.helpers.js";
 import {
   createSurplusMeal,
   getSurplusMealById,
@@ -13,12 +14,7 @@ import {
 } from "../validators/surplus-meal.validator.js";
 import { parsePaginationQuery } from "../utils/list-query.js";
 
-function zodErrorsToMap(issues) {
-  return issues.map((issue) => ({
-    path: issue.path.join("."),
-    message: issue.message,
-  }));
-}
+
 
 export async function createMeal(req, res, next) {
   try {
