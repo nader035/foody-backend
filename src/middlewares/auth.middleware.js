@@ -3,7 +3,11 @@ import { env } from "../config/env.js";
 import { ApiError } from "../utils/apiResponse.js";
 import { User } from "../models/user.model.js";
 
-function extractBearerToken(authHeader = "") {
+function extractToken(req) {
+  if (req.cookies && req.cookies.token) {
+    return req.cookies.token;
+  }
+  const authHeader = req.headers.authorization || "";
   return authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
 }
 
@@ -24,7 +28,7 @@ async function resolveAuthenticatedUser(token) {
 
 export async function requireAuth(req, res, next) {
   try {
-    const token = extractBearerToken(req.headers.authorization || "");
+    const token = extractToken(req);
 
     if (!token) {
       throw new ApiError(401, "Authorization token is required");
@@ -45,7 +49,7 @@ export async function requireAuth(req, res, next) {
 
 export async function optionalAuth(req, res, next) {
   try {
-    const token = extractBearerToken(req.headers.authorization || "");
+    const token = extractToken(req);
     if (!token) {
       return next();
     }

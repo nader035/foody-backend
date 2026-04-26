@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import userRoutes from "./routes/user.routes.js";
 import branchRoutes from "./routes/branch.routes.js";
@@ -34,6 +35,7 @@ app.use(
 );
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+app.use(cookieParser());
 app.use(morgan("dev"));
 
 app.get("/health", (req, res) => {

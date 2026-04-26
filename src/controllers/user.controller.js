@@ -23,6 +23,15 @@ import {
   updateStaffStatusSchema,
 } from "../validators/user.validator.js";
 
+function setTokenCookie(res, token) {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+}
+
 
 
 export async function register(req, res, next) {
@@ -38,9 +47,10 @@ export async function register(req, res, next) {
     }
 
     const result = await registerUser(parsed.data);
+    setTokenCookie(res, result.token);
     return res
       .status(201)
-      .json(new ApiResponse(201, "User registered successfully", result));
+      .json(new ApiResponse(201, "User registered successfully", { user: result.user }));
   } catch (error) {
     return next(error);
   }
@@ -80,9 +90,24 @@ export async function login(req, res, next) {
     }
 
     const result = await loginUser(parsed.data);
+    setTokenCookie(res, result.token);
     return res
       .status(200)
-      .json(new ApiResponse(200, "Login successful", result));
+      .json(new ApiResponse(200, "Login successful", { user: result.user }));
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function logout(req, res, next) {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 0,
+    });
+    return res.status(200).json(new ApiResponse(200, "Logged out successfully"));
   } catch (error) {
     return next(error);
   }
