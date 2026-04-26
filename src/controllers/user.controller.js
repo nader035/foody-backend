@@ -18,21 +18,22 @@ import {
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
   updateProfileSchema,
   createStaffSchema,
   updateStaffStatusSchema,
 } from "../validators/user.validator.js";
 
 function setTokenCookie(res, token) {
+  const isProduction = process.env.NODE_ENV === "production";
+
   res.cookie("token", token, {
     httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 }
-
-
 
 export async function register(req, res, next) {
   try {
@@ -50,7 +51,11 @@ export async function register(req, res, next) {
     setTokenCookie(res, result.token);
     return res
       .status(201)
-      .json(new ApiResponse(201, "User registered successfully", { user: result.user }));
+      .json(
+        new ApiResponse(201, "User registered successfully", {
+          user: result.user,
+        }),
+      );
   } catch (error) {
     return next(error);
   }
@@ -101,13 +106,17 @@ export async function login(req, res, next) {
 
 export async function logout(req, res, next) {
   try {
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("token", "", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 0,
     });
-    return res.status(200).json(new ApiResponse(200, "Logged out successfully"));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Logged out successfully"));
   } catch (error) {
     return next(error);
   }
