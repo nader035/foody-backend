@@ -105,6 +105,13 @@ export async function loginUser(payload) {
     throw new ApiError(403, "Account is inactive");
   }
 
+  if (payload.role && user.role !== payload.role) {
+    throw new ApiError(
+      403,
+      `Account role mismatch. This account belongs to a ${user.role}. Please use the correct login portal.`,
+    );
+  }
+
   const isValidPassword = await user.comparePassword(payload.password);
   if (!isValidPassword) {
     throw new ApiError(401, "Invalid email or password");

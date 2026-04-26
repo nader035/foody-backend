@@ -58,6 +58,7 @@ export const registerSchema = z
 export const loginSchema = z.object({
   email: z.email(),
   password: z.string().min(1, "Password is required"),
+  role: z.enum(roles).optional(),
 });
 
 export const createStaffSchema = z.object({
